@@ -299,17 +299,47 @@ always @(posedge clk)
 // Normalize Result
 //
 wire		ine_d;
-wire	[47:0]	fract_denorm, fract_div;
+reg	[47:0]	fract_denorm;
+wire	[47:0]	fract_div;
 wire		sign_d;
 reg		sign;
+reg	[30:0]	opa_r1;
+reg	[47:0]	fract_i2f;
+reg		opas_r1, opas_r2;
+wire		f2i_out_sign;
 
 always @(posedge clk)			// Exponent must be once cycle delayed
-	exp_r <= #1 fpu_op_r2[1] ? exp_mul : exp_fasu;
+	case(fpu_op_r2)
+	  0,1:	exp_r <= #1 exp_fasu;
+	  2,3:	exp_r <= #1 exp_mul;
+	  4:	exp_r <= #1 0;
+	  5:	exp_r <= #1 opa_r1[30:23];
+	endcase
 
 assign fract_div = (opb_dn ? quo[49:2] : {quo[26:0], 21'h0});
 
-assign fract_denorm =  !fpu_op_r3[1] ? {fract_out_q, 20'h0}:
-			fpu_op_r3[0] ? fract_div : prod;
+always @(posedge clk)
+	opa_r1 <= #1 opa_r[30:0];
+
+always @(posedge clk)
+	fract_i2f <= #1 (fpu_op_r2==5) ?
+			(sign_d ?  1-{24'h00, (|opa_r1[30:23]), opa_r1[22:0]}-1 : {24'h0, (|opa_r1[30:23]), opa_r1[22:0]}) :
+			(sign_d ? 1 - {opa_r1, 17'h01} : {opa_r1, 17'h0});
+
+always @(fpu_op_r3 or fract_out_q or prod or fract_div or fract_i2f)
+	case(fpu_op_r3)
+	   0,1:	fract_denorm = {fract_out_q, 20'h0};
+	   2:	fract_denorm = prod;
+	   3:	fract_denorm = fract_div;
+	   4,5:	fract_denorm = fract_i2f;
+	endcase
+
+
+always @(posedge clk)
+	opas_r1 <= #1 opa_r[31];
+
+always @(posedge clk)
+	opas_r2 <= #1 opas_r1;
 
 assign sign_d = fpu_op_r2[1] ? sign_mul : sign_fasu;
 
@@ -318,6 +348,7 @@ always @(posedge clk)
 
 post_norm u4(.clk(clk),			// System Clock
 	.fpu_op(fpu_op_r3),		// Floating Point Operation
+	.opas(opas_r2),			// OPA Sign
 	.sign(sign),			// Sign of the result
 	.rmode(rmode_r3),		// Rounding mode
 	.fract_in(fract_denorm),	// Fraction Input
@@ -331,7 +362,8 @@ post_norm u4(.clk(clk),			// System Clock
 	.out(out_d),			// Normalized output (un-registered)
 	.ine(ine_d),			// Result Inexact output (un-registered)
 	.overflow(overflow_d),		// Overflow output (un-registered)
-	.underflow(underflow_d)		// Underflow output (un-registered)
+	.underflow(underflow_d),	// Underflow output (un-registered)
+	.f2i_out_sign(f2i_out_sign)	// F2I Output Sign
 	);
 
 ////////////////////////////////////////////////////////////////////////
@@ -382,7 +414,7 @@ assign out_fixed = (	(qnan_d | snan_d) |
 		   )  ? QNAN : INF;
 
 always @(posedge clk)
-	out[30:0] <= #1 (mul_inf | div_inf | (inf_d & (fpu_op_r3!=3'b011)) | snan_d | qnan_d) ? out_fixed :
+	out[30:0] <= #1 (mul_inf | div_inf | (inf_d & (fpu_op_r3!=3'b011) & (fpu_op_r3!=3'b101)) | snan_d | qnan_d) & fpu_op_r3!=3'b100 ? out_fixed :
 			out_d;
 
 assign out_d_00 = !(|out_d);
@@ -391,7 +423,8 @@ assign sign_mul_final = (sign_exe_r & ((opa_00 & opb_inf) | (opb_00 & opa_inf)))
 assign sign_div_final = (sign_exe_r & (opa_inf & opb_inf)) ? !sign_mul_r : sign_mul_r | (opa_00 & opb_00);
 
 always @(posedge clk)
-	out[31] <= #1	((fpu_op_r3==3'b010) & !(snan_d | qnan_d)) ?	sign_mul_final :
+	out[31] <= #1	((fpu_op_r3==3'b101) & out_d_00) ? (f2i_out_sign & !(qnan_d | snan_d) ) :
+			((fpu_op_r3==3'b010) & !(snan_d | qnan_d)) ?	sign_mul_final :
 			((fpu_op_r3==3'b011) & !(snan_d | qnan_d)) ?	sign_div_final :
 			(snan_d | qnan_d | ind_d) ?			nan_sign_d :
 			output_zero_fasu ?				result_zero_sign_d :
@@ -407,8 +440,9 @@ assign ine_div  = (ine_d | overflow_d | underflow_d) & !(opb_00 | snan_d | qnan_
 assign ine_fasu = (ine_d | overflow_d | underflow_d) & !(snan_d | qnan_d | inf_d);
 
 always @(posedge  clk)
-	ine <= #1 !fpu_op_r3[1] ? ine_fasu :
-		   fpu_op_r3[0] ? ine_div  : ine_mul;
+	ine <= #1	 fpu_op_r3[2] ? ine_d :
+			!fpu_op_r3[1] ? ine_fasu :
+			 fpu_op_r3[0] ? ine_div  : ine_mul;
 
 
 assign overflow_fasu = overflow_d & !(snan_d | qnan_d | inf_d);
@@ -416,8 +450,9 @@ assign overflow_fmul = !inf_d & (inf_mul_r | inf_mul2 | overflow_d) & !(snan_d |
 assign overflow_fdiv = (overflow_d & !(opb_00 | inf_d | snan_d | qnan_d));
 
 always @(posedge clk)
-	overflow <= #1 !fpu_op_r3[1] ? overflow_fasu :
-			fpu_op_r3[0] ? overflow_fdiv : overflow_fmul;
+	overflow <= #1	 fpu_op_r3[2] ? 0 :
+			!fpu_op_r3[1] ? overflow_fasu :
+			 fpu_op_r3[0] ? overflow_fdiv : overflow_fmul;
 
 always @(posedge clk)
 	underflow_fmul_r <= #1 underflow_fmul_d;
@@ -433,7 +468,8 @@ assign underflow_fmul = underflow_fmul1 & !(snan_d | qnan_d | inf_mul_r);
 assign underflow_fdiv = underflow_fasu & !opb_00;
 
 always @(posedge clk)
-	underflow <= #1 !fpu_op_r3[1] ? underflow_fasu :
+	underflow <= #1  fpu_op_r3[2] ? 0 :
+			!fpu_op_r3[1] ? underflow_fasu :
 			 fpu_op_r3[0] ? underflow_fdiv : underflow_fmul;
 
 always @(posedge clk)
@@ -481,22 +517,26 @@ always @(test.error_event)
 
 // Status Outputs
 always @(posedge clk)
-	qnan <= #1	snan_d | qnan_d | (ind_d & !fasu_op_r2) |
-			(opa_00 & opb_00 & fpu_op_r3==3'b011) |
-			(((opa_inf & opb_00) | (opb_inf & opa_00 )) & fpu_op_r3==3'b010);
+	qnan <= #1	fpu_op_r3[2] ? 0 : (
+						snan_d | qnan_d | (ind_d & !fasu_op_r2) |
+						(opa_00 & opb_00 & fpu_op_r3==3'b011) |
+						(((opa_inf & opb_00) | (opb_inf & opa_00 )) & fpu_op_r3==3'b010)
+					   );
 
 assign inf_fmul = 	(((inf_mul_r | inf_mul2) & (rmode_r3==2'h0)) | opa_inf | opb_inf) & 
 			!((opa_inf & opb_00) | (opb_inf & opa_00 )) &
 			fpu_op_r3==3'b010;
 
 always @(posedge clk)
-	inf <= #1	!(qnan_d | snan_d) & (
+	inf <= #1	fpu_op_r3[2] ? 0 :
+			(!(qnan_d | snan_d) & (
 						((&out_d[30:23]) & !(|out_d[22:0]) & !(opb_00 & fpu_op_r3==3'b011)) |
 						(inf_d & !(ind_d & !fasu_op_r2) & !fpu_op_r3[1]) |
 						inf_fmul |
 						(!opa_00 & opb_00 & fpu_op_r3==3'b011) |
 						(fpu_op_r3==3'b011 & opa_inf & !opb_inf)
-					);
+					      )
+			);
 
 assign output_zero_fasu = out_d_00 & !(inf_d | snan_d | qnan_d);
 assign output_zero_fdiv = (div_00 | (out_d_00 & !opb_00)) & !(opa_inf & opb_inf) &
@@ -506,7 +546,8 @@ assign output_zero_fmul = (out_d_00 | opa_00 | opb_00) &
 			  !(opa_inf & opb_00) & !(opb_inf & opa_00);
 
 always @(posedge clk)
-	zero <= #1	fpu_op_r3==3'b011 ?	output_zero_fdiv :
+	zero <= #1	fpu_op_r3==3'b101 ?	out_d_00 & !(snan_d | qnan_d):
+			fpu_op_r3==3'b011 ?	output_zero_fdiv :
 			fpu_op_r3==3'b010 ?	output_zero_fmul :
 						output_zero_fasu ;
 

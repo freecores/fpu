@@ -38,5 +38,5 @@ verilog		test_bench/test_top.v	\
 Do not change the directory structure, the testbench
 depends on it !
 
-Please also rea the readme file in the test_vectors
+Please also read the README file in the test_vectors
 directory.
