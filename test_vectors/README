@@ -21,7 +21,7 @@ There are currently two types of tests:
    mode are randomly selected and may change every cycle. This
    tests are located in the combo directory.
 
-There are currently 10,602,998 test vectors !
+There are currently 14,808,684 test vectors !
 
-WARNING: You need about 320Mb of disk space to build all test
+WARNING: You need about 470Mb of disk space to build all test
 vectors !!!

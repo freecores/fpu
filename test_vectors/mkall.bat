@@ -184,3 +184,171 @@ rem -------------------- Combo Tests
 pg -q -m 15 -R -n 499995 -ll    -o combo/fpu_combo1.hex
 
 pg -q -m 15 -R -n 499995 -s 17  -o combo/fpu_combo2.hex
+
+pg -q -m 63 -R -n 499995 -ll -s 7 -o combo/fpu_combo3.hex
+
+pg -q -m 63 -R -n 499995 -s 255   -o combo/fpu_combo4.hex
+
+
+
+rem -------------------- i2f round to nearest even
+
+pg -q -r 0 -m 16 -p 0          -o rtne/i2f_pat0.hex
+
+pg -q -r 0 -m 16 -p 1          -o rtne/i2f_pat1.hex
+
+pg -q -r 0 -m 16 -p 2          -o rtne/i2f_pat2.hex
+
+pg -q -r 0 -m 16 -n 199990 -ll -o rtne/i2f_lg.hex
+
+pg -q -r 0 -m 16 -n 199990     -o rtne/i2f_sm.hex
+
+
+rem -------------------- i2f round to zero
+
+pg -q -r 3 -m 16 -p 0          -o rtzero/i2f_pat0.hex
+
+pg -q -r 3 -m 16 -p 1          -o rtzero/i2f_pat1.hex
+
+pg -q -r 3 -m 16 -p 2          -o rtzero/i2f_pat2.hex
+
+pg -q -r 3 -m 16 -n 199990 -ll -o rtzero/i2f_lg.hex
+
+pg -q -r 3 -m 16 -n 199990     -o rtzero/i2f_sm.hex
+
+
+
+rem -------------------- i2f round to inf + (up)
+
+pg -q -r 2 -m 16 -p 0          -o rup/i2f_pat0.hex
+
+pg -q -r 2 -m 16 -p 1          -o rup/i2f_pat1.hex
+
+pg -q -r 2 -m 16 -p 2          -o rup/i2f_pat2.hex
+
+pg -q -r 2 -m 16 -n 199990 -ll -o rup/i2f_lg.hex
+
+pg -q -r 2 -m 16 -n 199990     -o rup/i2f_sm.hex
+
+
+
+rem -------------------- i2f round to inf - (down)
+
+pg -q -r 1 -m 16 -p 0          -o rdown/i2f_pat0.hex
+
+pg -q -r 1 -m 16 -p 1          -o rdown/i2f_pat1.hex
+
+pg -q -r 1 -m 16 -p 2          -o rdown/i2f_pat2.hex
+
+pg -q -r 1 -m 16 -n 199990 -ll -o rdown/i2f_lg.hex
+
+pg -q -r 1 -m 16 -n 199990     -o rdown/i2f_sm.hex
+
+
+
+rem -------------------- f2i round to nearest even
+
+pg -q -r 0 -m 32 -p 0          -o rtne/f2i_pat0.hex
+
+pg -q -r 0 -m 32 -p 1          -o rtne/f2i_pat1.hex
+
+pg -q -r 0 -m 32 -p 2          -o rtne/f2i_pat2.hex
+
+pg -q -r 0 -m 32 -n 199990 -ll -o rtne/f2i_lg.hex
+
+pg -q -r 0 -m 32 -n 199990     -o rtne/f2i_sm.hex
+
+
+rem -------------------- f2i round to zero
+
+pg -q -r 3 -m 32 -p 0          -o rtzero/f2i_pat0.hex
+
+pg -q -r 3 -m 32 -p 1          -o rtzero/f2i_pat1.hex
+
+pg -q -r 3 -m 32 -p 2          -o rtzero/f2i_pat2.hex
+
+pg -q -r 3 -m 32 -n 199990 -ll -o rtzero/f2i_lg.hex
+
+pg -q -r 3 -m 32 -n 199990     -o rtzero/f2i_sm.hex
+
+
+
+rem -------------------- f2i round to inf + (up)
+
+pg -q -r 2 -m 32 -p 0          -o rup/f2i_pat0.hex
+
+pg -q -r 2 -m 32 -p 1          -o rup/f2i_pat1.hex
+
+pg -q -r 2 -m 32 -p 2          -o rup/f2i_pat2.hex
+
+pg -q -r 2 -m 32 -n 199990 -ll -o rup/f2i_lg.hex
+
+pg -q -r 2 -m 32 -n 199990     -o rup/f2i_sm.hex
+
+
+
+rem -------------------- f2i round to inf - (down)
+
+pg -q -r 1 -m 32 -p 0          -o rdown/f2i_pat0.hex
+
+pg -q -r 1 -m 32 -p 1          -o rdown/f2i_pat1.hex
+
+pg -q -r 1 -m 32 -p 2          -o rdown/f2i_pat2.hex
+
+pg -q -r 1 -m 32 -n 199990 -ll -o rdown/f2i_lg.hex
+
+pg -q -r 1 -m 32 -n 199990     -o rdown/f2i_sm.hex
+
+
+rem -------------------- frem round to nearest even
+
+pg -q -r 0 -m 64 -p 0          -o rtne/frem_pat0.hex
+
+pg -q -r 0 -m 64 -p 1          -o rtne/frem_pat1.hex
+
+pg -q -r 0 -m 64 -p 2          -o rtne/frem_pat2.hex
+
+pg -q -r 0 -m 64 -n 199990 -ll -o rtne/frem_lg.hex
+
+pg -q -r 0 -m 64 -n 199990     -o rtne/frem_sm.hex
+
+
+rem -------------------- frem round to zero
+
+pg -q -r 3 -m 64 -p 0          -o rtzero/frem_pat0.hex
+
+pg -q -r 3 -m 64 -p 1          -o rtzero/frem_pat1.hex
+
+pg -q -r 3 -m 64 -p 2          -o rtzero/frem_pat2.hex
+
+pg -q -r 3 -m 64 -n 199990 -ll -o rtzero/frem_lg.hex
+
+pg -q -r 3 -m 64 -n 199990     -o rtzero/frem_sm.hex
+
+
+
+rem -------------------- frem round to inf + (up)
+
+pg -q -r 2 -m 64 -p 0          -o rup/frem_pat0.hex
+
+pg -q -r 2 -m 64 -p 1          -o rup/frem_pat1.hex
+
+pg -q -r 2 -m 64 -p 2          -o rup/frem_pat2.hex
+
+pg -q -r 2 -m 64 -n 199990 -ll -o rup/frem_lg.hex
+
+pg -q -r 2 -m 64 -n 199990     -o rup/frem_sm.hex
+
+
+
+rem -------------------- frem round to inf - (down)
+
+pg -q -r 1 -m 64 -p 0          -o rdown/frem_pat0.hex
+
+pg -q -r 1 -m 64 -p 1          -o rdown/frem_pat1.hex
+
+pg -q -r 1 -m 64 -p 2          -o rdown/frem_pat2.hex
+
+pg -q -r 1 -m 64 -n 199990 -ll -o rdown/frem_lg.hex
+
+pg -q -r 1 -m 64 -n 199990     -o rdown/frem_sm.hex

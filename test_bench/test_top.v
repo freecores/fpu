@@ -52,9 +52,9 @@ reg	[31:0]	opb1, opb2, opb3, opb4;
 reg	[2:0]	fpu_op, fpu_op1, fpu_op2, fpu_op3, fpu_op4, fpu_op5;
 reg	[3:0]	rmode, rmode1, rmode2, rmode3, rmode4, rmode5;
 reg		start, s1, s2, s3, s4;
-reg	[111:0]	tmem[0:500000];
-reg	[111:0]	tmp;
-reg	[3:0]	oper;
+reg	[115:0]	tmem[0:500000];
+reg	[115:0]	tmp;
+reg	[7:0]	oper;
 reg	[7:0]	exc, exc1, exc2, exc3, exc4;
 integer		i;
 wire		ine;
@@ -70,6 +70,8 @@ reg		fp_fasu;
 reg		fp_mul;
 reg		fp_div;
 reg		fp_combo;
+reg		fp_i2f;
+reg		fp_f2i;
 reg		test_exc;
 reg		show_prog;
 event		error_event;
@@ -91,16 +93,27 @@ initial
 	vcount = 0;
 
 	show_prog = 0;
+
+	fp_combo = 0;
+	fp_fasu  = 0;
+	fp_mul   = 0;
+	fp_div   = 0;
+	fp_i2f   = 1;
+	fp_f2i   = 1;
+
+	test_exc = 1;
+	test_sel   = 5'b01111;
+	test_rmode = 4'b1111;
+
+	//test_sel   = 5'b00110;
+	//test_rmode = 4'b01110;
+
 	fp_combo = 1;
 	fp_fasu  = 1;
 	fp_mul   = 1;
 	fp_div   = 1;
-	test_exc = 1;
-	test_sel   = 5'b00110;
-	test_rmode = 4'b0101;
-
-	//test_sel   = 5'b00110;
-	//test_rmode = 4'b01110;
+	fp_i2f   = 1;
+	fp_f2i   = 1;
 
 	test_sel   = 5'b11111;
 	test_rmode = 4'b1111;
@@ -126,7 +139,7 @@ begin
 	opa = 32'hx;
 	opb = 32'hx;
 	fpu_rmode = 2'hx;
-	fpu_op = 2'hx;
+	fpu_op = 3'hx;
 
 	repeat(4) @(posedge clk);
 	#1;
@@ -140,9 +153,9 @@ begin
 		#1;
 		start = 1;
 		tmp   = tmem[i];
-		rmode = tmp[111:108];
-		exc   = tmp[107:100];
-		oper  = tmp[99:96];
+		rmode = tmp[115:112];
+		exc   = tmp[111:104];
+		oper  = tmp[103:96];
 		opa   = tmp[95:64];
 		opb   = tmp[63:32];
 		exp   = tmp[31:00];
@@ -166,12 +179,16 @@ begin
 		//   2   sub
 		//   4   mul
 		//   8   div
+		//   ...
 
 		case(oper)
-		   1:	fpu_op=3'b000;	// Add
-		   2:	fpu_op=3'b001;	// Sub
-		   4:	fpu_op=3'b010;	// Mul
-		   8:	fpu_op=3'b011;	// Div
+		   8'b00000001:	fpu_op=3'b000;	// Add
+		   8'b00000010:	fpu_op=3'b001;	// Sub
+		   8'b00000100:	fpu_op=3'b010;	// Mul
+		   8'b00001000:	fpu_op=3'b011;	// Div
+		   8'b00010000:	fpu_op=3'b100;	// i2f
+		   8'b00100000:	fpu_op=3'b101;	// f2i
+		   8'b01000000:	fpu_op=3'b110;	// rem
 		   default: fpu_op=3'bx;
 		endcase
 
@@ -260,6 +277,7 @@ always @(posedge clk)
 			$display("\nERROR: DIV_BY_ZERO Exception: Expected: %h, Got %h\n",exc4[2],div_by_zero);
 		   end
 
+
 		if(ine !== exc4[5])
 		   begin
 		   	exc_err=1;
@@ -292,13 +310,14 @@ always @(posedge clk)
 			$display("\nERROR: INF Detection Failed. INF: %h, Sum: %h\n", inf, sum);
 		   end
 	
-	
-		if(qnan !== ( &sum[30:23]  & |sum[22:0] ) )
+
+		if(qnan !== ( &sum[30:23]  & |sum[22:0] )  & !(fpu_op4==5)   )
 		   begin
 		   	exc_err=1;
 			$display("\nERROR: QNAN Detection Failed. QNAN: %h, Sum: %h\n", qnan, sum);
 		   end
-	
+
+
 		if(snan !== ( ( &opa4[30:23] & !opa4[22] & |opa4[21:0]) | ( &opb4[30:23] & !opb4[22] & |opb4[21:0]) ) )
 		   begin
 		   	exc_err=1;
@@ -309,6 +328,7 @@ always @(posedge clk)
 
 
 	m0 = ( (|sum) !== 1'b1) & ( (|sum) !== 1'b0);		// result unknown (ERROR)
+	//m0 = ( (|sum) === 1'bx) & 0;
 	m1 = (exp4 === sum);					// results are equal
 
 	// NAN   *** Ignore Fraction Detail ***
@@ -325,6 +345,7 @@ always @(posedge clk)
 		#0.6;
 		$display("\n%t: ERROR: output mismatch. Expected %h, Got %h (%h)", $time, exp4, sum, {opa4, opb4, exp4} );
 		$write("opa:\t");	disp_fp(opa4);
+		$display("opa:\t%h",opa4[30:0]);
 		case(fpu_op4)
 		   0: $display("\t+");
 		   1: $display("\t-");

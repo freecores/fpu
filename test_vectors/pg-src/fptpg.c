@@ -49,8 +49,6 @@ main(int argc, char **argv)
 {
 int	i;
 int	count=25;
-int	do_i2f=0;
-int	do_f2i=0;
 int	ar = 0;
 int	seed = 12345678;
 
@@ -74,14 +72,15 @@ if(argc<2) {
 	printf("			1 = float_round_down\n");
 	printf("			2 = float_round_up\n");
 	printf("			3 = float_round_to_zero\n");
-	printf("	-i2f		Generate Integer to Floating Point Conv. Vectors.\n");
-	printf("	-f2i		Generate Floating Point to Integer Conv. Vectors.\n");
 	printf("	-m N		Generate Test patters for operation N.\n");
 	printf("			Where N is a combination of:\n");
-	printf("			1 = Add operations\n");
-	printf("			2 = Subtract Operations\n");
-	printf("			4 = Multiply Operations\n");
-	printf("			8 = Divide operations\n");
+	printf("			 1 = Add operations\n");
+	printf("			 2 = Subtract Operations\n");
+	printf("			 4 = Multiply Operations\n");
+	printf("			 8 = Divide operations\n");
+	printf("			16 = Integer to Floating Point Conversion\n");
+	printf("			32 = Floating Point to Integer Conversion\n");
+	printf("			64 = Remainder Function\n");
 	printf("	-s N		Use N as seed for rand() functions.\n");
 	printf("	-R		Randomize rounding mode.\n");
 	return(0);
@@ -91,10 +90,6 @@ i=1;
 
 while((argc-1)>=i)	{
 
-	if(strcmp(argv[i],"-i2f")==0)	do_i2f=1;
-	else
-	if(strcmp(argv[i],"-f2i")==0)	do_f2i=1;
-	else
 	if(strcmp(argv[i],"-v")==0)	verb=1;
 	else
 	if(strcmp(argv[i],"-q")==0)	quiet=1;
@@ -152,7 +147,7 @@ while((argc-1)>=i)	{
 srand( seed );
 
 if(!quiet) {
-	printf("\n Floating Point Test Vector Generation V1.5\n");
+	printf("\n Floating Point Test Vector Generation V1.6\n");
 	printf("\t by  Rudolf Usselmann  rudi@asics.ws\n\n");
 
 	switch(float_rounding_mode) {
@@ -166,16 +161,27 @@ if(!quiet) {
   }
 
 if(count==25) {
-	if(pat==1)	count = 92416;
-	else
-	if(pat==2)	count = 92416;
-	else
-	if(pat==3)	count = 15376;
+
+	if( (ar & 0x10) | (ar & 0x20) )  {
+
+		if(pat==1)	count = 304;
+		else
+		if(pat==2)	count = 304;
+		else
+		if(pat==3)	count = 124;
+
+	} else {
+
+		if(pat==1)	count = 92416;
+		else
+		if(pat==2)	count = 92416;
+		else
+		if(pat==3)	count = 15376;
+
+	}
 
    }
 
-if(do_i2f)	i2f(count);
-if(do_f2i)	f2i(count);
 if(ar)		arop(count,ar);
 
 return(0);
@@ -191,9 +197,13 @@ int	add=0;
 int	sub=0;
 int	mul=0;
 int	div=0;
+int	i2f=0;
+int	f2i=0;
+int	rem=0;
 int	oper;
 int	err;
 int	err_count=0;
+int	tmp;
 
 if(!quiet) printf("\nGenerating %0d Arithmetic test vectors ...\n",count);
 
@@ -208,16 +218,22 @@ if(fp == 0) {
    }
 
 if(!quiet) {
-	if(op & 0x1)	printf("Add OP\n");
-	if(op & 0x2)	printf("Sub OP\n");
-	if(op & 0x4)	printf("Mul OP\n");
-	if(op & 0x8)	printf("Div OP\n");
+	if(op & 0x01)	printf("Add OP\n");
+	if(op & 0x02)	printf("Sub OP\n");
+	if(op & 0x04)	printf("Mul OP\n");
+	if(op & 0x08)	printf("Div OP\n");
+	if(op & 0x10)	printf("int2float\n");
+	if(op & 0x20)	printf("float2int\n");
+	if(op & 0x40)	printf("Remainder\n");
    }
 
-if(op & 0x1)	add=1;
-if(op & 0x2)	sub=1;
-if(op & 0x4)	mul=1;
-if(op & 0x8)	div=1;
+if(op & 0x01)	add=1;
+if(op & 0x02)	sub=1;
+if(op & 0x04)	mul=1;
+if(op & 0x08)	div=1;
+if(op & 0x10)	i2f=1;
+if(op & 0x20)	f2i=1;
+if(op & 0x40)	rem=1;
 
 f1 = get_pat(0);	// Initialize pattern generator ...
 
@@ -239,10 +255,39 @@ for(i=0;i<count;i++) {
 
 	oper = -1;
 	while(oper == -1) {
-	float_exception_flags = 0;	// Reset Exceptions
+	float_exception_flags = 0;			// Reset Exceptions
 
-		if( (rand() % 4)==3 & div) {
-			oper = 8;
+		if( (rand() % 8)==6 & rem) {
+			oper = 0x40;
+			f3 = float32_rem( f1, f2 );
+			float_exception_flags = 0;	// Reset Exceptions
+			f3 = float32_rem( f1, f2 );
+		   }
+
+		if( (rand() % 8)==5 & f2i) {
+			oper = 0x20;
+			f3 = float32_to_int32( f1 );
+			float_exception_flags = 0;	// Reset Exceptions
+			f3 = float32_to_int32( f1 );
+			f2 = 0;
+		   }
+
+		if( (rand() % 8)==4 & i2f) {
+			oper = 0x10;
+
+
+			tmp = (int) f1;
+
+
+			f3 = int32_to_float32( tmp );
+			float_exception_flags = 0;	// Reset Exceptions
+			f3 = int32_to_float32( tmp );
+			f2 =0;
+		   }
+
+
+		if( (rand() % 8)==3 & div) {
+			oper = 0x08;
 			f3 = float32_div( f1, f2);
 			float_exception_flags = 0;	// Reset Exceptions
 			f3 = float32_div( f1, f2);
@@ -254,8 +299,8 @@ for(i=0;i<count;i++) {
 			//   }
 		   }
 
-		if( (rand() % 4)==2 & mul) {
-			oper = 4;
+		if( (rand() % 8)==2 & mul) {
+			oper = 0x04;
 			f3 = float32_mul( f1, f2);
 			float_exception_flags = 0;	// Reset Exceptions
 			f3 = float32_mul( f1, f2);
@@ -267,8 +312,8 @@ for(i=0;i<count;i++) {
 			//   }
 		   }
 
-		if( (rand() % 4)==1 & sub) {
-			oper = 2;
+		if( (rand() % 8)==1 & sub) {
+			oper = 0x02;
 			f3 = float32_sub( f1, f2);
 			float_exception_flags = 0;	// Reset Exceptions
 			f3 = float32_sub( f1, f2);
@@ -280,8 +325,8 @@ for(i=0;i<count;i++) {
 			//   }
 		   }
 
-		if( (rand() % 4)==0 & add) {
-			oper = 1;
+		if( (rand() % 8)==0 & add) {
+			oper = 0x01;
 			f3 = float32_add( f1, f2);
 			float_exception_flags = 0;	// Reset Exceptions
 			f3 = float32_add( f1, f2);
@@ -303,8 +348,8 @@ for(i=0;i<count;i++) {
 		//	printf("Exceptions: %x\n",float_exception_flags);
 	
 	
-		if(verb)	printf("rmode: %01x, except: %02x, oper: %01x opa: %08x, opb: %08x res: %08x\n", float_rounding_mode, float_exception_flags, oper, f1, f2, f3);
-		fprintf(fp,"%01x%02x%01x%08x%08x%08x\n", float_rounding_mode, float_exception_flags, oper, f1, f2, f3);
+		if(verb)	printf("rmode: %01x, except: %02x, oper: %02x opa: %08x, opb: %08x res: %08x\n", float_rounding_mode, float_exception_flags, oper, f1, f2, f3);
+		fprintf(fp,"%01x%02x%02x%08x%08x%08x\n", float_rounding_mode, float_exception_flags, oper, f1, f2, f3);
 	   }
 	else {
 		printf("\t Vecor mismatch between library and system calculations. This Vector\n");

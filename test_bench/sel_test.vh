@@ -39,6 +39,14 @@
 			$readmemh ("test_vectors/combo/fpu_combo2.hex", tmem);
 			run_test;
 
+			$display("\nRunning Combo Test 3 ...\n");
+			$readmemh ("test_vectors/combo/fpu_combo3.hex", tmem);
+			run_test;
+
+			$display("\nRunning Combo Test 4 ...\n");
+			$readmemh ("test_vectors/combo/fpu_combo4.hex", tmem);
+			run_test;
+
 	   end
 
 	if(fp_fasu)
@@ -675,6 +683,343 @@
 		   begin
 			$display("\nRunning Random Sm. Num Test ...\n");
 			$readmemh ("test_vectors/rdown/fdiv_sm.hex", tmem);
+			run_test;
+		   end
+	   end
+	end
+
+
+
+	if(fp_i2f)
+	begin
+
+	$display("\n\nTesting FP I2F Unit\n");
+
+	if(test_rmode[0])
+	   begin
+		$display("\n+++++ ROUNDING MODE: Nearest Even\n\n");
+
+		if(test_sel[0])
+		   begin
+			$display("\nRunning Pat 0 Test ...\n");
+			$readmemh ("test_vectors/rtne/i2f_pat0.hex", tmem);
+			run_test;
+		   end
+		
+		if(test_sel[1])
+		   begin
+			$display("\nRunning Pat 1 Test ...\n");
+			$readmemh ("test_vectors/rtne/i2f_pat1.hex", tmem);
+			run_test;
+		   end
+		
+		if(test_sel[2])
+		   begin
+			$display("\nRunning Pat 2 Test ...\n");
+			$readmemh ("test_vectors/rtne/i2f_pat2.hex", tmem);
+			run_test;
+		   end
+		
+		if(test_sel[3])
+		   begin
+			$display("\nRunning Random Lg. Num Test ...\n");
+			$readmemh ("test_vectors/rtne/i2f_lg.hex", tmem);
+			run_test;
+		   end
+		
+		if(test_sel[4])
+		   begin
+			$display("\nRunning Random Sm. Num Test ...\n");
+			$readmemh ("test_vectors/rtne/i2f_sm.hex", tmem);
+			run_test;
+		   end
+	   end
+
+	if(test_rmode[1])
+	   begin
+		$display("\n\n+++++ ROUNDING MODE: Towards Zero\n\n");
+
+		if(test_sel[0])
+		   begin
+			$display("\nRunning Pat 0 Test ...\n");
+			$readmemh ("test_vectors/rtzero/i2f_pat0.hex", tmem);
+			run_test;
+		   end
+		
+		if(test_sel[1])
+		   begin
+			$display("\nRunning Pat 1 Test ...\n");
+			$readmemh ("test_vectors/rtzero/i2f_pat1.hex", tmem);
+			run_test;
+		   end
+		
+		if(test_sel[2])
+		   begin
+			$display("\nRunning Pat 2 Test ...\n");
+			$readmemh ("test_vectors/rtzero/i2f_pat2.hex", tmem);
+			run_test;
+		   end
+		
+		if(test_sel[3])
+		   begin
+			$display("\nRunning Random Lg. Num Test ...\n");
+			$readmemh ("test_vectors/rtzero/i2f_lg.hex", tmem);
+			run_test;
+		   end
+		
+		if(test_sel[4])
+		   begin
+			$display("\nRunning Random Sm. Num Test ...\n");
+			$readmemh ("test_vectors/rtzero/i2f_sm.hex", tmem);
+			run_test;
+		   end
+	   end
+
+	if(test_rmode[2])
+	   begin
+		$display("\n\n+++++ ROUNDING MODE: Towards INF+ (UP)\n\n");
+
+		if(test_sel[0])
+		   begin
+			$display("\nRunning Pat 0 Test ...\n");
+			$readmemh ("test_vectors/rup/i2f_pat0.hex", tmem);
+			run_test;
+		   end
+		
+		if(test_sel[1])
+		   begin
+			$display("\nRunning Pat 1 Test ...\n");
+			$readmemh ("test_vectors/rup/i2f_pat1.hex", tmem);
+			run_test;
+		   end
+		
+		if(test_sel[2])
+		   begin
+			$display("\nRunning Pat 2 Test ...\n");
+			$readmemh ("test_vectors/rup/i2f_pat2.hex", tmem);
+			run_test;
+		   end
+		
+		if(test_sel[3])
+		   begin
+			$display("\nRunning Random Lg. Num Test ...\n");
+			$readmemh ("test_vectors/rup/i2f_lg.hex", tmem);
+			run_test;
+		   end
+
+		if(test_sel[4])
+		   begin
+			$display("\nRunning Random Sm. Num Test ...\n");
+			$readmemh ("test_vectors/rup/i2f_sm.hex", tmem);
+			run_test;
+		   end
+
+	   end
+
+	if(test_rmode[3])
+	   begin
+		$display("\n\n+++++ ROUNDING MODE: Towards INF- (DOWN)\n\n");
+
+		if(test_sel[0])
+		   begin
+			$display("\nRunning Pat 0 Test ...\n");
+			$readmemh ("test_vectors/rdown/i2f_pat0.hex", tmem);
+			run_test;
+		   end
+		
+		if(test_sel[1])
+		   begin
+			$display("\nRunning Pat 1 Test ...\n");
+			$readmemh ("test_vectors/rdown/i2f_pat1.hex", tmem);
+			run_test;
+		   end
+		
+		if(test_sel[2])
+		   begin
+			$display("\nRunning Pat 2 Test ...\n");
+			$readmemh ("test_vectors/rdown/i2f_pat2.hex", tmem);
+			run_test;
+		   end
+		
+		if(test_sel[3])
+		   begin
+			$display("\nRunning Random Lg. Num Test ...\n");
+			$readmemh ("test_vectors/rdown/i2f_lg.hex", tmem);
+			run_test;
+		   end
+
+		if(test_sel[4])
+		   begin
+			$display("\nRunning Random Sm. Num Test ...\n");
+			$readmemh ("test_vectors/rdown/i2f_sm.hex", tmem);
+			run_test;
+		   end
+	   end
+	end
+
+
+	if(fp_f2i)
+	begin
+
+	$display("\n\nTesting FP F2I Unit\n");
+
+	if(test_rmode[0])
+	   begin
+		$display("\n+++++ ROUNDING MODE: Nearest Even\n\n");
+
+		if(test_sel[0])
+		   begin
+			$display("\nRunning Pat 0 Test ...\n");
+			$readmemh ("test_vectors/rtne/f2i_pat0.hex", tmem);
+			run_test;
+		   end
+		
+		if(test_sel[1])
+		   begin
+			$display("\nRunning Pat 1 Test ...\n");
+			$readmemh ("test_vectors/rtne/f2i_pat1.hex", tmem);
+			run_test;
+		   end
+		
+		if(test_sel[2])
+		   begin
+			$display("\nRunning Pat 2 Test ...\n");
+			$readmemh ("test_vectors/rtne/f2i_pat2.hex", tmem);
+			run_test;
+		   end
+		
+		if(test_sel[3])
+		   begin
+			$display("\nRunning Random Lg. Num Test ...\n");
+			$readmemh ("test_vectors/rtne/f2i_lg.hex", tmem);
+			run_test;
+		   end
+		
+		if(test_sel[4])
+		   begin
+			$display("\nRunning Random Sm. Num Test ...\n");
+			$readmemh ("test_vectors/rtne/f2i_sm.hex", tmem);
+			run_test;
+		   end
+	   end
+
+	if(test_rmode[1])
+	   begin
+		$display("\n\n+++++ ROUNDING MODE: Towards Zero\n\n");
+
+		if(test_sel[0])
+		   begin
+			$display("\nRunning Pat 0 Test ...\n");
+			$readmemh ("test_vectors/rtzero/f2i_pat0.hex", tmem);
+			run_test;
+		   end
+		
+		if(test_sel[1])
+		   begin
+			$display("\nRunning Pat 1 Test ...\n");
+			$readmemh ("test_vectors/rtzero/f2i_pat1.hex", tmem);
+			run_test;
+		   end
+		
+		if(test_sel[2])
+		   begin
+			$display("\nRunning Pat 2 Test ...\n");
+			$readmemh ("test_vectors/rtzero/f2i_pat2.hex", tmem);
+			run_test;
+		   end
+		
+		if(test_sel[3])
+		   begin
+			$display("\nRunning Random Lg. Num Test ...\n");
+			$readmemh ("test_vectors/rtzero/f2i_lg.hex", tmem);
+			run_test;
+		   end
+		
+		if(test_sel[4])
+		   begin
+			$display("\nRunning Random Sm. Num Test ...\n");
+			$readmemh ("test_vectors/rtzero/f2i_sm.hex", tmem);
+			run_test;
+		   end
+	   end
+
+	if(test_rmode[2])
+	   begin
+		$display("\n\n+++++ ROUNDING MODE: Towards INF+ (UP)\n\n");
+
+		if(test_sel[0])
+		   begin
+			$display("\nRunning Pat 0 Test ...\n");
+			$readmemh ("test_vectors/rup/f2i_pat0.hex", tmem);
+			run_test;
+		   end
+		
+		if(test_sel[1])
+		   begin
+			$display("\nRunning Pat 1 Test ...\n");
+			$readmemh ("test_vectors/rup/f2i_pat1.hex", tmem);
+			run_test;
+		   end
+		
+		if(test_sel[2])
+		   begin
+			$display("\nRunning Pat 2 Test ...\n");
+			$readmemh ("test_vectors/rup/f2i_pat2.hex", tmem);
+			run_test;
+		   end
+		
+		if(test_sel[3])
+		   begin
+			$display("\nRunning Random Lg. Num Test ...\n");
+			$readmemh ("test_vectors/rup/f2i_lg.hex", tmem);
+			run_test;
+		   end
+
+		if(test_sel[4])
+		   begin
+			$display("\nRunning Random Sm. Num Test ...\n");
+			$readmemh ("test_vectors/rup/f2i_sm.hex", tmem);
+			run_test;
+		   end
+
+	   end
+
+	if(test_rmode[3])
+	   begin
+		$display("\n\n+++++ ROUNDING MODE: Towards INF- (DOWN)\n\n");
+
+		if(test_sel[0])
+		   begin
+			$display("\nRunning Pat 0 Test ...\n");
+			$readmemh ("test_vectors/rdown/f2i_pat0.hex", tmem);
+			run_test;
+		   end
+		
+		if(test_sel[1])
+		   begin
+			$display("\nRunning Pat 1 Test ...\n");
+			$readmemh ("test_vectors/rdown/f2i_pat1.hex", tmem);
+			run_test;
+		   end
+		
+		if(test_sel[2])
+		   begin
+			$display("\nRunning Pat 2 Test ...\n");
+			$readmemh ("test_vectors/rdown/f2i_pat2.hex", tmem);
+			run_test;
+		   end
+		
+		if(test_sel[3])
+		   begin
+			$display("\nRunning Random Lg. Num Test ...\n");
+			$readmemh ("test_vectors/rdown/f2i_lg.hex", tmem);
+			run_test;
+		   end
+
+		if(test_sel[4])
+		   begin
+			$display("\nRunning Random Sm. Num Test ...\n");
+			$readmemh ("test_vectors/rdown/f2i_sm.hex", tmem);
 			run_test;
 		   end
 	   end
