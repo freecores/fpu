@@ -9,7 +9,8 @@ FPU Notes
 
 
 
-
+FPU
+===
 The FPU consists of the following files:
 
 		verilog/fpu.v
@@ -24,7 +25,7 @@ The FPU consists of the following files:
 The testbench is in: test_bench/test_top.v
 
 To simulate the FPU using the included test bench
-us a comand like:
+use a comand like:
 
 verilog		test_bench/test_top.v	\
 		verilog/fpu.v		\
@@ -35,6 +36,24 @@ verilog		test_bench/test_top.v	\
 		verilog/pre_norm_fmul.v
 
 
+
+FCMP
+====
+The FP compare consists of
+	fcmp/verilog/fcmp.v
+
+The testbench for FP compare is in: fcmp/test_bench/test_top.v
+
+To simulate the FP compare using the included test bench
+use a comand like:
+
+verilog		fcmp/test_bench/test_top.v	\
+		fcmp/verilog/fcmp.v
+
+
+
+MISC
+====
 Do not change the directory structure, the testbench
 depends on it !
 

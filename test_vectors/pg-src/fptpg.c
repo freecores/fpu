@@ -34,6 +34,7 @@ int	pat=0;
 int	large=0;
 int	append=0;
 int	rall=0;
+int	fcmp=0;
 char	*ofile=0;
 
 // Prototypes ...
@@ -89,7 +90,8 @@ if(argc<2) {
 i=1;
 
 while((argc-1)>=i)	{
-
+	if(strcmp(argv[i],"-fcmp")==0)	fcmp=1;
+	else
 	if(strcmp(argv[i],"-v")==0)	verb=1;
 	else
 	if(strcmp(argv[i],"-q")==0)	quiet=1;
@@ -147,7 +149,7 @@ while((argc-1)>=i)	{
 srand( seed );
 
 if(!quiet) {
-	printf("\n Floating Point Test Vector Generation V1.6\n");
+	printf("\n Floating Point Test Vector Generation V1.7\n");
 	printf("\t by  Rudolf Usselmann  rudi@asics.ws\n\n");
 
 	switch(float_rounding_mode) {
@@ -183,6 +185,7 @@ if(count==25) {
    }
 
 if(ar)		arop(count,ar);
+if(fcmp)	do_fcmp(count);
 
 return(0);
 }
@@ -365,10 +368,90 @@ if(!quiet) {
 	printf("Found %d errors\n",err_count);
 	printf("Wrote %d vectors from total %d specified.\n", (count-err_count), count);
 	
-	printf("\n ... f2i done.\n");
+	printf("\n ... fptpg done.\n");
    }
 return(0);
 }
+
+
+
+do_fcmp(int count) {
+float32 f1, f2, f3, f4;
+int	i;
+int	fp;
+char	*mode;
+int	err;
+int	err_count=0;
+int	result;
+int	eq, le, lt;
+
+if(!quiet) printf("\nGenerating %0d Arithmetic test vectors ...\n",count);
+
+if(append)	mode = "a";
+else		mode = "w";
+if(ofile==0)	ofile = "ar.hex";
+
+fp = fopen(ofile,mode);
+if(fp == 0) {
+	printf("ERROR: Could not create file '%s'.\n",ofile);
+	return(-1);
+   }
+
+
+for(i=0;i<count;i++) {
+
+	float_exception_flags = 0;			// Reset Exceptions
+
+	if(pat>0) {
+		f1 = get_pat(1);
+		f2 = get_pat(2);
+	   } else {
+		f1 = get_fp();
+		f2 = get_fp();
+	   }
+
+	eq = float32_eq( f1, f2 );
+	le = float32_le( f1, f2 );
+	lt = float32_lt( f1, f2 );
+
+	float_exception_flags = 0;			// Reset Exceptions
+
+	eq = float32_eq( f1, f2 );
+	le = float32_le( f1, f2 );
+	lt = float32_lt( f1, f2 );
+
+	eq = *( (float *) &f1 ) == *( (float *) &f2 );
+	le = *( (float *) &f1 ) < *( (float *) &f2 );
+	lt = *( (float *) &f1 ) > *( (float *) &f2 );
+
+
+	if(eq)	result = 1;
+	else
+	if(le)	result = 2;
+	else
+	if(lt)	result = 4;
+	else	result = 0;
+
+
+	if(verb)	printf("except: %02x, opa: %08x, opb: %08x res: %01x\n",  float_exception_flags, f1, f2, result);
+	fprintf(fp,"%02x%08x%08x%01x\n",  float_exception_flags, f1, f2, result);
+	}
+
+close(fp);
+
+if(!quiet) {
+	printf("Found %d errors\n",err_count);
+	printf("Wrote %d vectors from total %d specified.\n", (count-err_count), count);
+	
+	printf("\n ... fptpg done.\n");
+
+   }
+
+return(0);
+
+}
+
+
 
 float32 get_fp() {
 float32 f1;
